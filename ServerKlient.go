@@ -17,9 +17,11 @@ func main() {
 
 	go func() {
 		mux := http.NewServeMux()
+
 		mux.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "v1.0.0")
 		})
+
 		mux.HandleFunc("/decode", func(w http.ResponseWriter, r *http.Request) {
 			if r.Method != http.MethodPost {
 				http.Error(w, "Only POST method is allowed", http.StatusMethodNotAllowed)
@@ -43,6 +45,7 @@ func main() {
 			}{OutputString: string(decodedBytes)}
 			json.NewEncoder(w).Encode(resp)
 		})
+
 		mux.HandleFunc("/hard-op", func(w http.ResponseWriter, r *http.Request) {
 			sleepTime := time.Duration(10+rand.Intn(11)) * time.Second
 			time.Sleep(sleepTime)
@@ -52,11 +55,14 @@ func main() {
 				fmt.Fprintf(w, "Success")
 			}
 		})
+
 		server := &http.Server{
 			Addr:    ":8080",
 			Handler: mux,
 		}
+
 		log.Println("Starting server on :8080")
+
 		if err := server.ListenAndServe(); err != nil {
 			log.Fatalf("Server failed: %s", err)
 		}
@@ -67,9 +73,11 @@ func main() {
 	client := &http.Client{}
 
 	resp, err := client.Get("http://localhost:8080/version")
+
 	if err != nil {
 		log.Fatalf("Error fetching version: %v", err)
 	}
+
 	version, _ := ioutil.ReadAll(resp.Body)
 	fmt.Printf("Version: %s\n", version)
 	resp.Body.Close()
@@ -79,6 +87,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error decoding string: %v", err)
 	}
+
 	decoded, _ := ioutil.ReadAll(resp.Body)
 	fmt.Printf("Decoded string: %s\n", decoded)
 	resp.Body.Close()
@@ -91,6 +100,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error performing hard-op: %v", err)
 	}
+	
 	hardOpResult, _ := ioutil.ReadAll(resp.Body)
 	fmt.Printf("Hard-op result: %s\n", hardOpResult)
 	resp.Body.Close()
